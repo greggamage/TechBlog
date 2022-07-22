@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>Tech Blog</title>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Tech Blog</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="./index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="profile.html">Profile</a>
+          </li>
+        </ul>
+        <button id="logout" class="btn btn-outline-primary" type="submit">Logout</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="row bg-light p-5 rounded-lg mb-3 mt-3">
+      <h1 class="display-4">Tech Blog</h1>
+      <p class="lead">This is a simple blog application!</p>
+      <hr class="my-4">
+      <p class="lead"><span id="username"></span>'s posts!</p>
+    </div>
+    <div class="container bg-light">
+      <div id="posts" class="row"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
+    <script>
+
+      async function logoutUser() {
+        localStorage.removeItem('username')
+        localStorage.removeItem('token')
+        location = '/login.html'
+      }
+
+      function getUserPosts() {
+        axios.get('/api/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+          .then(res => {
+
+            console.log(res.data)
+            let items = res.data.posts
+            let userInfo = res.data
+            items.forEach(item => {
+              let itemElem = document.createElement('div')
+              itemElem.classList.add("col-sm-4")
+              itemElem.innerHTML = `
+            <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title data-postid="${item.id}"> ${item.title}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">Posted by ${userInfo.username} at ${item.createdAt.slice(0, -14)}</h6>
+              <p class="card-text">${item.body}</p>
+              <a href="/post.html" class="btn btn-dark btn-lg goToPost" data-postid="${item.id}" tabindex="-1" role="button">Go To Comment</a>
+            </div>
+            </div>
+            <br>
+            `
+              document.getElementById('posts').prepend(itemElem)
+            })
+          })
+      }
+      getUserPosts()
+
+      document.addEventListener('click', event => {
+        if (event.target.classList.contains('goToPost')) {
+          console.log('ping')
+          localStorage.setItem('postId', event.target.dataset.postid)
+          location = '/post.html'
+        }
+      })
+
+
+      async function logoutUser() {
+        localStorage.removeItem('token')
+        location = '/login.html'
+      }
+
+      document.getElementById("logout").addEventListener('click', event => {
+        event.preventDefault()
+        logoutUser()
+      })
+    </script>
+</body>
+
+</html>
